@@ -2,7 +2,8 @@
 
 > Predicting which telecom customers will leave — and why — using XGBoost, SHAP, and Streamlit.
 
-
+[![Live App](https://img.shields.io/badge/Live%20App-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://customer-churn-prediction-scoxvfmcnhs84xzcqxjqnh.streamlit.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-vin1bun-181717?style=for-the-badge&logo=github)](https://github.com/vin1bun/customer-churn-prediction)
 
 ---
 
