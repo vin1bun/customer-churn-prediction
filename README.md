@@ -105,6 +105,26 @@ Actual  Stayed    797       236
 
 > Prioritized **Recall over Precision** — missing a churner (False Negative) costs far more than a false alarm. Each missed churner = lost revenue with no retention opportunity.
 
+## 💰 Business Impact — Customer Lifetime Value (CLV)
+
+Beyond predicting churn, I calculated the business value at risk for each customer:
+
+| Metric | Value |
+|--------|-------|
+| Total CLV at Risk | $714,578 |
+| Average CLV per Churner | $1,247 |
+| Monthly Revenue at Risk | $41,625 |
+| High Risk Customers | 573 customers |
+
+**Why CLV matters:**
+Not all churners are equal. A customer paying $95/month deserves more
+retention effort than one paying $25/month. CLV helps the retention team
+decide WHERE to spend their budget — prioritizing high value customers first.
+
+**Priority Tiers in the Streamlit App:**
+- 🔴 HIGH PRIORITY → CLV > $1,500
+- 🟡 MEDIUM PRIORITY → CLV $800–$1,500
+- 🟢 LOW PRIORITY → CLV < $800
 ---
 
 ## 🔎 SHAP Explainability
