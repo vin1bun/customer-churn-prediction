@@ -18,7 +18,7 @@ st.set_page_config(
 
 # --- Title ---
 st.title("📱 Customer Churn Predictor")
-st.markdown("**Predict if a customer will leave — and why**")
+st.markdown("**Predict if a customer will leave — and what they are worth**")
 st.divider()
 
 # --- Sidebar inputs ---
@@ -26,10 +26,10 @@ st.sidebar.header("👤 Customer Details")
 
 tenure = st.sidebar.slider("Tenure (months)", 0, 72, 12)
 monthly_charges = st.sidebar.slider("Monthly Charges ($)", 0, 120, 65)
-contract = st.sidebar.selectbox("Contract Type", 
+contract = st.sidebar.selectbox("Contract Type",
     ["Month-to-month", "One year", "Two year"])
 payment = st.sidebar.selectbox("Payment Method",
-    ["Electronic check", "Mailed check", 
+    ["Electronic check", "Mailed check",
      "Bank transfer (automatic)", "Credit card (automatic)"])
 internet = st.sidebar.selectbox("Internet Service",
     ["DSL", "Fiber optic", "No"])
@@ -39,9 +39,9 @@ dependents = st.sidebar.selectbox("Dependents", ["Yes", "No"])
 partner = st.sidebar.selectbox("Partner", ["Yes", "No"])
 senior = st.sidebar.selectbox("Senior Citizen", ["No", "Yes"])
 paperless = st.sidebar.selectbox("Paperless Billing", ["Yes", "No"])
-multiple_lines = st.sidebar.selectbox("Multiple Lines", 
+multiple_lines = st.sidebar.selectbox("Multiple Lines",
     ["Yes", "No", "No phone service"])
-streaming_tv = st.sidebar.selectbox("Streaming TV", 
+streaming_tv = st.sidebar.selectbox("Streaming TV",
     ["Yes", "No", "No internet service"])
 streaming_movies = st.sidebar.selectbox("Streaming Movies",
     ["Yes", "No", "No internet service"])
@@ -95,7 +95,7 @@ input_dict = {
 input_df = pd.DataFrame([input_dict])[feature_names]
 
 # --- Scale numeric columns ---
-scale_cols = ["tenure", "MonthlyCharges", "TotalCharges", 
+scale_cols = ["tenure", "MonthlyCharges", "TotalCharges",
               "avg_monthly_spend", "charge_per_service"]
 input_df[scale_cols] = scaler.transform(input_df[scale_cols])
 
@@ -103,33 +103,54 @@ input_df[scale_cols] = scaler.transform(input_df[scale_cols])
 prob = model.predict_proba(input_df)[0][1]
 prediction = int(prob >= 0.5)
 
+# --- Calculate CLV ---
+clv = monthly_charges * (1 / max(prob, 0.01)) * 12
+
+# --- Priority Level based on CLV ---
+if clv > 1500:
+    priority = "🔴 HIGH PRIORITY"
+elif clv > 800:
+    priority = "🟡 MEDIUM PRIORITY"
+else:
+    priority = "🟢 LOW PRIORITY"
+
 # --- Show Results ---
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.subheader("🎯 Prediction Result")
+    st.subheader("🎯 Churn Prediction")
     if prediction == 1:
-        st.error(f"🔴 HIGH CHURN RISK")
+        st.error("🔴 HIGH CHURN RISK")
     else:
-        st.success(f"🟢 LOW CHURN RISK")
-    
+        st.success("🟢 LOW CHURN RISK")
     st.metric("Churn Probability", f"{prob*100:.1f}%")
 
 with col2:
-    st.subheader("💡 Retention Recommendation")
+    st.subheader("💰 Customer Value")
+    st.metric("Customer Lifetime Value", f"${clv:,.0f}")
+    st.metric("Monthly Revenue", f"${monthly_charges}")
+    st.markdown(f"**Retention Priority:** {priority}")
+
+with col3:
+    st.subheader("💡 Retention Action")
     if prediction == 1:
         if contract == "Month-to-month":
             st.warning("👉 Offer discounted annual contract upgrade")
         if payment == "Electronic check":
             st.warning("👉 Encourage switch to automatic payment")
         if internet == "Fiber optic":
-            st.warning("👉 Review fiber optic pricing — offer loyalty discount")
+            st.warning("👉 Offer loyalty discount on fiber plan")
         if is_new_customer:
-            st.warning("👉 New customer — trigger onboarding support program")
+            st.warning("👉 Trigger onboarding support program")
         if services_count < 2:
-            st.warning("👉 Offer bundled services at discounted rate")
+            st.warning("👉 Offer bundled services discount")
     else:
         st.info("✅ Customer appears loyal — maintain engagement")
 
 st.divider()
+
+# --- CLV Insight Banner ---
+if prediction == 1:
+    st.error(f"⚠️ This customer represents **\${clv:,.0f}** in lifetime value at risk. {priority}")
+
 st.caption("Built by Vineet | Customer Churn Prediction Project")
